@@ -1,6 +1,5 @@
 __author__ = 'akeshavan'
 import nipype.pipeline.engine as pe
-import nipype.interfaces.freesurfer as fs
 import nipype.interfaces.io as nio
 from glob import glob
 import os
@@ -41,13 +40,15 @@ def cortical_thickness(t1_file, subject_id, template_home, sink_dir):
 -t {template_home}/OASIS-30_Atropos_template/T_template0_BrainCerebellum.nii.gz \
 -m {template_home}/OASIS-30_Atropos_template/T_template0_BrainCerebellumProbabilityMask.nii.gz \
 -f {template_home}/OASIS-30_Atropos_template/T_template0_BrainCerebellumExtractionMask.nii.gz \
--p {template_home}/OASIS-30_Atropos_template/Priors2/priors%d.nii.gz"
+-p {template_home}/OASIS-30_Atropos_template/Priors2/priors%d.nii.gz -k 1"
+
     output_folder = os.path.join(sink_dir, subject_id)+"/"
     cmd = cmd.format(t1_file=t1_file,
                      output_folder=output_folder,
                      template_home=template_home)
+    print cmd
     os.system(cmd)
-    if not os.path.exists(output_folder):
+    if not os.path.exists(os.path.join(output_folder,"CorticalThickness.nii.gz")):
         raise Exception("Something did not run!")
     else:
         return output_folder
@@ -62,7 +63,7 @@ thickbrain.inputs.sink_dir = sink
 
 wf.connect(datagrabber, "t1_filled", thickbrain, "t1_file")
 wf.connect(inputspec, "subject_id", datagrabber, "subject_id")
-wf.connect(inputspec,"subject_id", thickbrain,"subject_id")
+wf.connect(inputspec, "subject_id", thickbrain, "subject_id")
 
 wf.run(plugin="SGE", plugin_args={"qsub_args": os.environ["PLUGIN_ARGS"]})
 
