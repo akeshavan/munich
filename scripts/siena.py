@@ -257,6 +257,8 @@ def pairwise_splitter(subject_id, t1_files, mask_files, skull_files):
     tp2_files = []
     tp2mask_files = []
     tp2skull_files = []
+    tp1_subs = []
+    tp2_subs = []
 
     for sc in scanners:
         #valid_tps = [s for s in subject_id if s.endswith(sc)]
@@ -271,6 +273,8 @@ def pairwise_splitter(subject_id, t1_files, mask_files, skull_files):
             tp1mask_files.append(masks[idx_tp1])
             tp2skull_files.append(skulls[idx_tp2])
             tp2mask_files.append(masks[idx_tp2])
+            tp1_subs.append(subject_id[idx_tp1])
+            tp2_subs.append(subject_id[idx_tp2])
 
             tp1_files.append(t1s[idx_tp2])
             tp2_files.append(t1s[idx_tp1])
@@ -278,15 +282,18 @@ def pairwise_splitter(subject_id, t1_files, mask_files, skull_files):
             tp1mask_files.append(masks[idx_tp2])
             tp2skull_files.append(skulls[idx_tp1])
             tp2mask_files.append(masks[idx_tp1])
+            tp1_subs.append(subject_id[idx_tp2])
+            tp2_subs.append(subject_id[idx_tp1])
 
-    return tp1_files, tp2_files, tp1mask_files, tp2mask_files, tp1skull_files, tp2skull_files
+    return tp1_files, tp2_files, tp1mask_files, tp2mask_files, tp1skull_files, tp2skull_files, tp1_subs, tp2_subs
 
 
 splitter = pe.JoinNode(niu.Function(input_names= ["subject_id", "t1_files",
                                                   "mask_files", "skull_files"],
                                     output_names= ["tp1_files", "tp2_files",
                                                    "tp1mask", "tp2mask",
-                                                   "tp1skull", "tp2skull"],
+                                                   "tp1skull", "tp2skull",
+                                                   "tp1_subs", "tp2_subs"],
                                     function=pairwise_splitter),
                        name="pairwise_splitter",
                        joinfield=["subject_id",
@@ -317,10 +324,22 @@ s2 = pe.Node(nio.DataSink(), name="sinker2")
 s2.inputs.base_directory = sink
 wf.connect(siena, "all_files", s2, "siena")
 
+def get_subs(tp1_subs,tp2_subs):
+    subs = []
+    N = len(tp1_subs)
+    for i in range(N)[::-1]:
+        subs.append(("_siena%d"%i,"%s_%s" % (tp1_subs[i][:2], tp2_subs[i])))
+    return subs
+
+s2_subs = pe.Node(niu.Function(input_names=["tp1_subs","tp2_subs"],
+                               output_names=["subs"],
+                               function=get_subs),name="s2_subs")
+
+wf.connect(splitter, "tp1_subs", s2_subs, "tp1_subs")
+wf.connect(splitter, "tp2_subs", s2_subs, "tp2_subs")
+wf.connect(s2_subs, "subs", s2, "substitutions")
 
 wf.write_graph()
 
-wf.run(plugin="MultiProc",
-       plugin_args={"n_procs":4})
-
-#plugin="SGE", plugin_args={"qsub_args":os.environ["PLUGIN_ARGS"]})_author__ = 'akeshavan'
+wf.run(plugin="MultiProc", plugin_args={"n_procs":4})
+#plugin="SGE", plugin_args={"qsub_args":os.environ["PLUGIN_ARGS"]})

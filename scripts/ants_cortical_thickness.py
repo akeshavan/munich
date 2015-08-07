@@ -65,6 +65,6 @@ wf.connect(datagrabber, "t1_filled", thickbrain, "t1_file")
 wf.connect(inputspec, "subject_id", datagrabber, "subject_id")
 wf.connect(inputspec, "subject_id", thickbrain, "subject_id")
 
-wf.run(plugin="SGE", plugin_args={"qsub_args": os.environ["PLUGIN_ARGS"]})
+wf.run()#plugin="SGE", plugin_args={"qsub_args": os.environ["PLUGIN_ARGS"]})
 
 
