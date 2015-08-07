@@ -1,0 +1,76 @@
+<html>
+	<head>
+		<meta charset="utf-8">
+		  <title>Multisite QA</title>
+		  <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css">
+		  <link rel="stylesheet" href="css/dashboard.css">
+		  
+	</head>
+
+	<body ng-app="myApp" ng-controller="SidebarCtrl">
+		<aknavbar></aknavbar>
+	 	<div id="wrapper">
+		    <!-- Sidebar -->
+		    <div id="sidebar-wrapper">
+		        <ul class="sidebar-nav">
+		            <li ng-repeat="hdr in headers" ng-model-instant>
+		                <h3>{{hdr}}</h3>
+						<select class="multiselect" data-placeholder="Select" 
+						                ng-model="options[hdr]" ng-options="item as item for item in get_unique(hdr)"
+						                multiple="multiple" multiselect-dropdown ng-model-instant>
+                        </select>
+						
+		            </li>
+					<br>
+					<button class="btn btn-success" ng-click = "collect()">Generate</button>    
+		        </ul>
+		    </div>
+			<!-- End Sidebar -->
+ 
+	  
+	  	    <!-- Page Content -->
+	          <div id="page-content-wrapper">
+	              <div class="container-fluid">
+	                  <div class="row">
+	                      <div class="col-lg-12">
+	                          
+	                          <p>Choose options on the right to display images.</p>
+	                          <a href="#menu-toggle" class="btn btn-default" id="menu-toggle">Toggle Menu</a>
+							  <p></p>
+							  <div ng-repeat = "img in images">
+								  <div class="well">
+								  	<h5 ng-repeat = "hdr in headers">{{hdr}}: {{img[hdr]}}</h5>
+							      </div>
+								  
+								  <img ng-src="data/{{img.image}}" height="100%"/>
+								  
+							  </div>
+							  
+	                      </div>
+	                  </div>
+	              </div>
+	          </div>
+	          <!-- /#page-content-wrapper -->
+	  </div>
+	  <!--End Wrapper-->
+	</body>
+
+	<script src="bower_components/jquery/dist/jquery.min.js"></script>
+	<script src="bower_components/angular/angular.min.js"></script>
+	
+	<script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+	<script src="bower_components/d3/d3.min.js"></script>
+	<script src="bower_components/underscore/underscore.js"></script>
+	<script src="js/bootstrap-multiselect.js"></script>
+	<script src="js/app.js"></script>
+	<script src="js/navbar.js"></script>
+	<script src="js/multiselect-dropdown.js"></script>
+    
+	<!-- Menu Toggle Script -->
+    <script>
+    $("#menu-toggle").click(function(e) {
+        e.preventDefault();
+        $("#wrapper").toggleClass("toggled");
+    });
+    </script>
+</html>
