@@ -226,6 +226,7 @@ wf.connect(mask_skull, "out_file", t1_sx, "skull_file")
 wf.connect(reo3, "out_file", t1_sx, "mask_file")
 
 sinker = pe.Node(nio.DataSink(), name="sinker")
+sinker.inputs.base_directory = sink
 
 for i, node in enumerate([t1_sx]):#, t2_sx]):
     wf.connect(node, "html_report", sinker, "sienax.t%d.@html" % (i+1))

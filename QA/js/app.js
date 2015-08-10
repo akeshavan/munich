@@ -33,6 +33,7 @@ myApp.controller("SidebarCtrl", function($scope){
 		
 		$scope.collect = function(){
 			//console.log(options)
+			console.log($scope.options)
 			images = {}
 			data = $scope.data
 			data_tmp = []
